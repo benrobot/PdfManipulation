@@ -4,7 +4,7 @@
             var doc = readerControl.docViewer.getDocument();
             doc.getPDFDoc().then(function(pdfDoc){
                 // Ensure that we have our first page.
-                pdfDoc.requirePage(2).then(function(){
+                pdfDoc.requirePage(1).then(function(){
                     // Run our script
                     runCustomViewerCode(pdfDoc).then(function(){
                         // Refresh the cache with the newly updated document
@@ -23,6 +23,8 @@
         {
             console.log("Hello WebViewer!");
             var doc = pdfDoc;
+            // doc.initSecurityHandler();
+            // doc.lock();
             
             // Example 1) Add text stamp to all pages, then remove text stamp from odd pages. 
             try 
@@ -49,7 +51,34 @@
             } catch (err) {
                 console.log(err.stack)
                 ret = 1;
-            }             
+            }
+            
+            
+            // Example 2) Add cover page
+            try 
+            {
+                // start stack-based deallocation with startDeallocateStack. Later on when endDeallocateStack is called,
+                // all objects in memory that were initialized since the most recent startDeallocateStack call will be
+                // cleaned up. Doing this makes sure that memory growth does not get too high.
+                yield PDFNet.startDeallocateStack();
+
+                var coverPageDoc = yield PDFNet.PDFDoc.createFromURL("/resources/This_is_a_cover_page.pdf");
+                // coverPageDoc.initSecurityHandler();
+                // coverPageDoc.lock();
+                
+                var coverPage = yield coverPageDoc.getPage(1);
+                doc.pagePushFront(coverPage);
+                
+                // doc.unlock();
+                // coverPageDoc.unlock();
+                
+                console.log("Sample 2 complete");
+
+                yield PDFNet.endDeallocateStack();
+            } catch (err) {
+                console.log(err.stack)
+                ret = 1;
+            }      
             
         }
         return PDFNet.runGeneratorWithCleanup(main());
