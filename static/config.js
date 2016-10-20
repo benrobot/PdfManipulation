@@ -3,12 +3,17 @@
         PDFNet.initialize().then(function(){
             var doc = readerControl.docViewer.getDocument();
             doc.getPDFDoc().then(function(pdfDoc){
+                console.log("Page count BEFORE ALL: ", readerControl.docViewer.getPageCount());
                 // Ensure that we have our first page.
                 pdfDoc.requirePage(1).then(function(){
+                    console.log("Page count BEFORE runCustomViewerCode: ", readerControl.docViewer.getPageCount());
                     // Run our script
                     runCustomViewerCode(pdfDoc).then(function(){
+                        console.log("Page count BEFORE refreshAll: ", readerControl.docViewer.getPageCount());
                         // Refresh the cache with the newly updated document
                         readerControl.docViewer.refreshAll();
+                        
+                        console.log("Page count BEFORE updateView: ", readerControl.docViewer.getPageCount());
                         // Update viewer with new document
                         readerControl.docViewer.updateView();
                     });
@@ -67,7 +72,14 @@
                 // coverPageDoc.lock();
                 
                 var coverPage = yield coverPageDoc.getPage(1);
+                
+                var currentPageCount = yield doc.getPageCount();
+                console.log("doc pagecount BEFORE pagePushFront: ", currentPageCount);
+                
                 doc.pagePushFront(coverPage);
+                
+                currentPageCount = yield doc.getPageCount();
+                console.log("doc pagecount AFTER pagePushFront: ", currentPageCount);
                 
                 // doc.unlock();
                 // coverPageDoc.unlock();
